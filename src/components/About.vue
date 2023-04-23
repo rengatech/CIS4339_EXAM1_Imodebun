@@ -4,7 +4,7 @@ import { ref } from 'vue'
 </script>
 
 <template>
-  <h1 class="green">Hello World</h1>
+  <h1 class="green">About page</h1>
   <ul>
     <li><router-link to="/">Go to Home</router-link></li>
     <li>

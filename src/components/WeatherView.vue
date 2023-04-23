@@ -1,79 +1,173 @@
 <script setup>
-import HelloWorld from '../components/HelloWorld.vue'
+import { ref } from 'vue';
 import axios from "axios";
-import './js/app.js'
+import LineChart from './LineChart.vue';
 
-const options = {
-  method: 'GET',
-  url: 'https://weatherapi-com.p.rapidapi.com/current.json',
-  params: {q: '53.1,-0.13'},
-  headers: {
-    'X-RapidAPI-Key': 'dad336dc78msh7d991d24a2dc85fp1fcb63jsn9be4ee63eda3',
-    'X-RapidAPI-Host': 'weatherapi-com.p.rapidapi.com'
-  }
-};
-
-axios.request(options).then(function (response) {
-	console.log(response.data);
-}).catch(function (error) {
-	console.error(error);
-});
-
-defineProps({
-  msg: {
-    type: String,
-    required: true
-  }
+const requestData = ref({
+  location: null,
+  startDate: null,
+  endDate: null,
 })
+
+const numDays = () => {
+  // Define two dates in the format "yyyy-mm-dd"
+  const date1 = new Date(requestData.value.startDate);
+  const date2 = new Date(requestData.value.endDate);
+
+  // Calculate the difference in milliseconds
+  const diffInMs = date2 - date1;
+
+  // Convert the difference to days
+  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+  // Round the result to two decimal places
+  const roundedDiff = parseInt(diffInDays.toFixed(2));
+
+
+
+    return roundedDiff +1;
+
+}
+
+
+const getChartOptions = {
+  responsive: true
+}
+
+const dataLoaded = ref(false);
+const getChartData = ref({
+  labels: [],
+  datasets: [
+    {
+      label: 'Weather history',
+      backgroundColor: '#f87979',
+      data: []
+    }
+  ]
+})
+
+const getMaxDate = () => {
+  var today = new Date();
+
+  var year = today.getFullYear();
+  var month = String(today.getMonth() + 1).padStart(2, '0');
+  var day = String(today.getDate()).padStart(2, '0');
+
+  var formattedDate = `${year}-${month}-${day}`;
+
+  return formattedDate;
+}
+
+const getMinStartDate = () => {
+  var today = new Date();
+  var sevenDaysAgo = new Date(today.getTime() - (7 * 24 * 60 * 60 * 1000));
+
+  var year = sevenDaysAgo.getFullYear();
+  var month = String(sevenDaysAgo.getMonth() + 1).padStart(2, '0');
+  var day = String(sevenDaysAgo.getDate()).padStart(2, '0');
+
+  var formattedDate = `${year}-${month}-${day}`;
+
+  return formattedDate;
+
+}
+
+const submit = () => {
+  console.log(requestData.value);
+  dataLoaded.value = false
+  const options = {
+    method: 'GET',
+    url: 'https://weatherapi-com.p.rapidapi.com/history.json',
+    params: {
+      q: requestData.value.location,
+      dt: requestData.value.startDate,
+      end_dt: requestData.value.endDate
+    },
+    headers: {
+      'X-RapidAPI-Key': 'bc297cc6d4msh31d53d33a24095fp1c421djsn23995d64bce5',
+      'X-RapidAPI-Host': 'weatherapi-com.p.rapidapi.com'
+    }
+  };
+
+  axios.request(options).then(function (response) {
+    console.log(response.data);
+    const responseData = {
+      labels: [],
+      data: [],
+    };
+    response.data.forecast.forecastday.forEach(element => {
+      responseData.labels.push(element.date)
+      responseData.data.push(element.day.maxtemp_c)
+    })
+
+    console.log(responseData);
+
+    getChartData.value.labels = responseData.labels
+    getChartData.value.datasets[0].data = responseData.data
+
+    dataLoaded.value = true;
+  }).catch(function (error) {
+    console.error(error);
+  });
+}
+
+
 
 </script>
 
 <template>
- <div class="greetings row mt-5  d-flex topheight justify-content-center align-items-center">
-  <div class="col m-5">
-    <div>
-      <div class="d-flex flex-wrap">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Vue.js_Logo_2.svg/1200px-Vue.js_Logo_2.svg.png" width="90">
-    </div>
-    <div>
-      <HelloWorld msg="You did it!" />
-    <h3>
-      You’ve successfully created a project with
-      <a target="_blank" href="https://vitejs.dev/">Vite</a> +
-      <a target="_blank" href="https://vuejs.org/">Vue 3</a>.
-    </h3>
-    </div>
-    <div class="d-flex m-3 gap-3">
-      <a href="/home" class="text-black fw-bold text-decoration-none title">Home</a>
-      <a href="/about" class="text-black fw-bold text-decoration-none title">About</a>
-      <a href="/weatherview" class="text-black fw-bold text-decoration-none title">Weather</a>
-    </div>
-    </div>
+  <div class="container">
+    <div class="greetings row mt-5  d-flex topheight justify-content-center align-items-center">
+      <div class="col m-5">
+        <div>
+          <div class="d-flex flex-wrap">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Vue.js_Logo_2.svg/1200px-Vue.js_Logo_2.svg.png"
+              width="90" />
+          </div>
+          <div>
+            <h1 class="green">You did it!</h1>
 
-  </div>
-  <div class="col">
-  <h1>Weather Date</h1>
-  <p>Please fill the form and use the submit button to load data.</p>
-  <from method="GET">
-    <div>
-      <label class="w-100 bold">Location</label>
-      <input class=" form-control w-100 p-2 rounded "  type="text" name="location" v-model="name" placeholder="Type Your Location City" >
-    </div>
-    <div>
-      <label class="w-100 bold">Start Date</label>
-      <input class="form-control w-100 p-2 rounded"  type="date" name="startdate" id="">
-    </div>
-    <div>
-      <label class="w-100 bold">End Date</label>
-      <input class="form-control w-100 p-2 rounded"  type="date" name="enddate" id="">
-    </div>
-    <button type="sumbit" class="btn btn-danger mt-3">Submit</button>
-  </from>
+            <h3>
+              You’ve successfully created a project with
+              <a target="_blank" href="https://vitejs.dev/">Vite</a> +
+              <a target="_blank" href="https://vuejs.org/">Vue 3</a>.
+            </h3>
+          </div>
+          <div class="d-flex m-3 gap-3">
+            <router-link to="/">Home</router-link>
+            <router-link to="/about">About</router-link>
+            <router-link to="/weatherview">Weather View</router-link>
+          </div>
+        </div>
 
-  </div>
-  <div>
-    <div id='polynomial2_div' style='width: 900px; height: 500px;'></div>
-  </div>
+      </div>
+      <div class="col">
+        <h1>Weather Date</h1>
+        <p>Please fill the form and use the submit button to load data.</p>
+        <div>
+          <label class="w-100 bold">Location</label>
+          <input class=" form-control w-100 p-2 rounded " type="text" v-model="requestData.location"
+            placeholder="Type Your Location City" />
+        </div>
+        <div>
+          <label class="w-100 bold">Start Date</label>
+          <input class="form-control w-100 p-2 rounded" type="date" :min="getMinStartDate()" :max="getMaxDate()"
+            v-model="requestData.startDate" />
+        </div>
+        <div>
+          <label class="w-100 bold">End Date</label>
+          <input class="form-control w-100 p-2 rounded" type="date" :min="requestData.startDate" :max="getMaxDate()"
+            v-model="requestData.endDate" />
+        </div>
+        <button @click="submit" type="sumbit" class="btn btn-danger mt-3">Submit</button>
+        <div v-if="dataLoaded">
+          Data has been loaded for {{ numDays() }} {{ numDays() > 1 ? 'days' : 'day' }}
+          <LineChart :chartOptions="getChartOptions" :chartData="getChartData" />
+        </div>
+      </div>
+
+    </div>
   </div>
 </template>
 
@@ -92,20 +186,21 @@ h3 {
 .greetings h3 {
   text-align: center;
 }
-.topheight{
+
+.topheight {
   height: 700px;
 }
-.title:hover{
-background-color: white !important;
+
+.title:hover {
+  background-color: white !important;
 
 }
 
 @media (min-width: 1024px) {
+
   .greetings h1,
   .greetings h3 {
     text-align: left;
   }
 }
-
-
 </style>
