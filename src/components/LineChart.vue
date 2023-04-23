@@ -1,9 +1,9 @@
 <script setup>
-import axios from "axios";
-import { Line } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js'
+import axios from "axios"; // Importing axios library for HTTP requests
+import { Line } from 'vue-chartjs' // Importing Line chart component from vue-chartjs library
+import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js' // Importing Chart.js libraries and components
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement)
+ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement) // Registering Chart.js libraries and components
 
 const props = defineProps({
     chartOptions: {
@@ -14,20 +14,23 @@ const props = defineProps({
         type: Object,
         required: true
     }
-});
+}); // Defining props for the component using the defineProps function
 
 </script>
 
 <template>
-    
-      <Line
-    id="line-chart"
-    :options="props.chartOptions"
-    :data="props.chartData"
-  />
+    <!-- This is the template for the Line chart component -->
+    <!-- Passing chart options as a prop to the Line chart component
+     Passing chart data as a prop to the Line chart component -->
+    <Line
+        id="line-chart"
+        :options="props.chartOptions"
+        :data="props.chartData"
+    />
 </template>
 
 <style scoped>
+/* This is the scoped CSS style block for this component */
 h1 {
     font-weight: 500;
     font-size: 2.6rem;
@@ -53,7 +56,7 @@ h3 {
 }
 
 @media (min-width: 1024px) {
-
+    /* CSS rules for screens with minimum width of 1024px */
     .greetings h1,
     .greetings h3 {
         text-align: left;

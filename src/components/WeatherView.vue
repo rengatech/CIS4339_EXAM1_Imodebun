@@ -1,14 +1,19 @@
+<!-- This is a Vue.js script that sets up some reactive variables, functions and an event listener for a form submission. 
+It imports the ref and axios modules and the LineChart component from another file. -->
+
 <script setup>
 import { ref } from 'vue';
 import axios from "axios";
 import LineChart from './LineChart.vue';
 
+// Define a reactive variable with an object containing the data for the form.
 const requestData = ref({
   location: null,
   startDate: null,
   endDate: null,
 })
 
+// Define a function to calculate the number of days between two dates.
 const numDays = () => {
   // Define two dates in the format "yyyy-mm-dd"
   const date1 = new Date(requestData.value.startDate);
@@ -23,17 +28,15 @@ const numDays = () => {
   // Round the result to two decimal places
   const roundedDiff = parseInt(diffInDays.toFixed(2));
 
-
-
-    return roundedDiff +1;
-
+  return roundedDiff +1;
 }
 
-
+// Define an object with options for a chart.
 const getChartOptions = {
   responsive: true
 }
 
+// Define two reactive variables with an object for the chart data and a boolean for whether data has been loaded.
 const dataLoaded = ref(false);
 const getChartData = ref({
   labels: [],
@@ -46,6 +49,7 @@ const getChartData = ref({
   ]
 })
 
+// Define two functions to get the maximum date and minimum start date for the date inputs.
 const getMaxDate = () => {
   var today = new Date();
 
@@ -72,9 +76,11 @@ const getMinStartDate = () => {
 
 }
 
+// Define a function to handle form submission.
 const submit = () => {
-  console.log(requestData.value);
-  dataLoaded.value = false
+
+  dataLoaded.value = false // Set dataLoaded to false.
+  // Define options for a GET request to the weather API.
   const options = {
     method: 'GET',
     url: 'https://weatherapi-com.p.rapidapi.com/history.json',
@@ -89,31 +95,51 @@ const submit = () => {
     }
   };
 
+  // Make the GET request and update the chart data with the response.
   axios.request(options).then(function (response) {
-    console.log(response.data);
+
+    // Create a new object with empty 'labels' and 'data' properties
     const responseData = {
       labels: [],
       data: [],
     };
+    // For each element in the forecastday array of the response data, 
+    // push the date to the 'labels' array and the max temperature to the 'data' array
     response.data.forecast.forecastday.forEach(element => {
       responseData.labels.push(element.date)
       responseData.data.push(element.day.maxtemp_c)
     })
 
-    console.log(responseData);
-
+    // Set the 'labels' property of 'getChartData' to the 'labels' array of 'responseData'
+    // and set the 'data' property of the first dataset of 'getChartData' to the 'data' array of 'responseData'
     getChartData.value.labels = responseData.labels
     getChartData.value.datasets[0].data = responseData.data
-
+    // Set the 'dataLoaded' flag to true, indicating that the data has been loaded successfully
     dataLoaded.value = true;
   }).catch(function (error) {
+    // If there is an error, log the error to the console
     console.error(error);
   });
 }
 
-
-
 </script>
+
+// The template tag is a Vue.js component that defines the HTML markup for the template.
+// The div class="container" tag defines a container for the template.
+// The div class="greetings row mt-5 d-flex topheight justify-content-center align-items-center"> tag defines a row that contains the greetings and weather form.
+// The div class="col m-5" tag defines a column that contains the greetings.
+// The img tag displays the Vue.js logo.
+// The h1 and h3 tags display a message congratulating the user for successfully creating a project with Vite and Vue 3, and providing links to the Home, About, and Weather View pages.
+// The router-link> tags are used to create links to different pages in the application.
+// The div class="col"> tag defines a column that contains the weather form.
+// The h1> tag displays the title "Weather Date".
+// The p> tag displays a message telling the user to fill out the form to load data.
+// The input> tags allow the user to input their location and dates.
+// The v-model directive is used to bind the input fields to the component's data.
+// The :min and :max directives are used to set the minimum and maximum values for the date input fields.
+// The @click directive is used to bind the button to a function that is triggered when the user clicks it.
+// The v-if directive is used to conditionally render the data-loaded message and the line chart component based on whether the data has been loaded or not.
+// The LineChart component is a custom component that displays a line chart using the chart.js library. The component takes two props, chartOptions and chartData, which are used to configure the chart.
 
 <template>
   <div class="container">
@@ -170,6 +196,24 @@ const submit = () => {
     </div>
   </div>
 </template>
+
+
+// h1 styling:
+// font-weight: 500;: sets the font weight to 500 (medium)
+// font-size: 2.6rem;: sets the font size to 2.6 rem
+// top: -10px;: positions the element 10 pixels above its original position
+// h3 styling:
+// font-size: 1.2rem;: sets the font size to 1.2 rem
+// .greetings h1 and .greetings h3 styling:
+// text-align: center;: centers the text horizontally
+// .topheight styling:
+// height: 700px;: sets the height of the element to 700 pixels
+// .title:hover styling:
+// background-color: white !important;: sets the background color to white when the element is hovered over
+// @media (min-width: 1024px) rule:
+// Targets devices with a screen width of 1024 pixels or more
+// .greetings h1 and .greetings h3 styling:
+// text-align: left;: aligns the text to the left side of the container.
 
 <style scoped>
 h1 {
